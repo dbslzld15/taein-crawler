@@ -1,0 +1,35 @@
+FROM python:3.8.5-buster
+
+ARG poetry_version=1.0.5
+ARG env=production
+
+RUN pip install -U pip "poetry==${poetry_version}"
+RUN poetry config virtualenvs.create false
+
+COPY ./app/taein-store/pyproject.toml /store/app/taein-store/pyproject.toml
+COPY ./app/taein-store/poetry.lock /store/app/taein-store/poetry.lock
+COPY ./lib/crawler-python-commons/setup.py /store/lib/crawler-python-commons/setup.py
+COPY ./lib/tanker-python-commons/setup.py /store/lib/tanker-python-commons/setup.py
+COPY ./lib/loan-model/setup.py /store/lib/loan-model/setup.py
+COPY ./lib/tanker-core/setup.py /store/lib/tanker-core/setup.py
+
+WORKDIR /store/app/taein-store/
+
+RUN if [ ${env} != "production" ]; then \
+        POETRY_ARGS=""; \
+    else \
+        POETRY_ARGS="--no-dev"; \
+    fi; \
+    poetry install \
+        --no-interaction \
+        --no-ansi \
+        ${POETRY_ARGS}
+
+
+COPY ./app/taein-store /store/app/taein-store
+COPY ./lib/crawler-python-commons /store/lib/crawler-python-commons
+COPY ./lib/tanker-python-commons /store/lib/tanker-python-commons
+COPY ./lib/loan-model /store/lib/loan-model
+COPY ./lib/tanker-core /store/lib/tanker-core
+
+CMD python manage.py run

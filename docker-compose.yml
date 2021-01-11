@@ -1,0 +1,30 @@
+version: "3.3"
+volumes:
+  pgdata:
+services:
+  taein-crawler:
+    build:
+      context: .
+      dockerfile: Dockerfile-taein-crawler
+      args:
+        env: local
+    command: >
+      python manage.py run
+    volumes:
+      - ./app/taein-crawler/:/crawler/app/taein-crawler/
+      - ./lib/crawler-python-commons:/crawler/lib/crawler-python-commons
+    environment:
+      CRAWLER_ENVIRONMENT: local
+  taein-store:
+    build:
+      context: .
+      dockerfile: Dockerfile-taein-store
+      args:
+        env: local
+    command: >
+      python manage.py run
+    volumes:
+      - ./app/taein-store/:/store/app/taein-store/
+      - ./lib/crawler-python-commons:/store/lib/crawler-python-commons
+    environment:
+      STORE_ENVIRONMENT: local
